@@ -1,13 +1,27 @@
 "use client";
 
-import { createContext, useContext, useEffect, useState } from "react";
+import {
+  createContext,
+  useContext,
+  useEffect,
+  useReducer,
+  useState,
+} from "react";
+
+import {
+  ADD_AVATAR,
+  INITIAL_AVATARS,
+  REFRESH_ALL_AVATARS,
+  REFRESH_AVATAR,
+  rootReducer,
+} from "./rootReducer";
 
 const AvatarsContext = createContext();
 
 const useAvatarsContext = () => useContext(AvatarsContext);
 
 function useAvatarsProvider() {
-  const [avatars, setAvatars] = useState([]);
+  const [state, dispatch] = useReducer(rootReducer, { avatars: [] });
   const [loading, setLoading] = useState(false);
 
   const fetchAvatars = async (number) => {
@@ -27,7 +41,10 @@ function useAvatarsProvider() {
     setLoading(true);
     const newAvatars = await fetchAvatars(5);
     if (newAvatars) {
-      setAvatars(newAvatars);
+      dispatch({
+        type: INITIAL_AVATARS,
+        payload: newAvatars,
+      });
     }
     setLoading(false);
   };
@@ -36,7 +53,10 @@ function useAvatarsProvider() {
     setLoading(true);
     const newAvatar = await fetchAvatars(1);
     if (newAvatar) {
-      setAvatars((prevAvatars) => [...prevAvatars, ...newAvatar]);
+      dispatch({
+        type: ADD_AVATAR,
+        payload: newAvatar,
+      });
     }
     setLoading(false);
   };
@@ -45,28 +65,36 @@ function useAvatarsProvider() {
     setLoading(true);
     const newAvatar = await fetchAvatars(1);
     if (newAvatar) {
-      setAvatars(
-        avatars.map((avatar) => (avatar.id === id ? newAvatar[0] : avatar))
-      );
+      dispatch({
+        type: REFRESH_AVATAR,
+        payload: {
+          id,
+          newAvatar: newAvatar,
+        },
+      });
     }
     setLoading(false);
   };
 
   const refreshAllAvatars = async () => {
     setLoading(true);
-    const newAvatars = await fetchAvatars(avatars.length);
+    const newAvatars = await fetchAvatars(state.avatars.length);
     if (newAvatars) {
-      setAvatars(newAvatars);
+      dispatch({
+        type: REFRESH_ALL_AVATARS,
+        payload: newAvatars,
+      });
     }
     setLoading(false);
   };
 
   useEffect(() => {
     loaderAvatars();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return {
-    avatars,
+    avatars: state.avatars,
     addAvatar,
     refreshAvatar,
     refreshAllAvatars,
