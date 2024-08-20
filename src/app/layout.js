@@ -12,7 +12,7 @@ export const metadata = {
 };
 
 export default async function RootLayout({ children }) {
-  const res = await fetch(`api/avatars?number=5`);
+  const res = await fetch(`${process.env.URL}/api/avatars?number=5`);
 
   const initialAvatars = await res.json();
   return (
