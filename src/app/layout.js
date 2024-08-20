@@ -12,13 +12,10 @@ export const metadata = {
 };
 
 export default async function RootLayout({ children }) {
-  const res = await fetch(`${process.env.URL}/api/avatars?number=5`);
-
-  const initialAvatars = await res.json();
   return (
     <html lang="en">
       <body className={inter.className}>
-        <AvatarsProvider initialAvatars={initialAvatars}>
+        <AvatarsProvider>
           <Navbar />
           {children}
           <Footer />

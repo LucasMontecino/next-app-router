@@ -1,13 +1,13 @@
 "use client";
 
-import { createContext, useContext, useState } from "react";
+import { createContext, useContext, useEffect, useState } from "react";
 
 const AvatarsContext = createContext();
 
 const useAvatarsContext = () => useContext(AvatarsContext);
 
-function useAvatarsProvider(initialAvatars) {
-  const [avatars, setAvatars] = useState(initialAvatars);
+function useAvatarsProvider() {
+  const [avatars, setAvatars] = useState([]);
   const [loading, setLoading] = useState(false);
 
   const fetchAvatars = async (number) => {
@@ -21,6 +21,15 @@ function useAvatarsProvider(initialAvatars) {
     } catch (error) {
       console.log(error.message);
     }
+  };
+
+  const loaderAvatars = async () => {
+    setLoading(true);
+    const newAvatars = await fetchAvatars(5);
+    if (newAvatars) {
+      setAvatars(newAvatars);
+    }
+    setLoading(false);
   };
 
   const addAvatar = async () => {
@@ -52,6 +61,10 @@ function useAvatarsProvider(initialAvatars) {
     setLoading(false);
   };
 
+  useEffect(() => {
+    loaderAvatars();
+  }, []);
+
   return {
     avatars,
     addAvatar,
@@ -61,8 +74,8 @@ function useAvatarsProvider(initialAvatars) {
   };
 }
 
-function AvatarsProvider({ children, initialAvatars }) {
-  const avatarsProviderValue = useAvatarsProvider(initialAvatars);
+function AvatarsProvider({ children }) {
+  const avatarsProviderValue = useAvatarsProvider();
   return (
     <AvatarsContext.Provider value={avatarsProviderValue}>
       {children}
